@@ -10,47 +10,74 @@ Aplicación web de Python + Flask para visualización segura de resultados de la
 - **Cifrado de Datos**: Contraseñas con hash seguro (werkzeug.security)
 - **Sesiones Seguras**: Expiración automática tras 15 minutos de inactividad
 
-## 🚀 Instalación
+## 🚀 Instalación y Prueba
 
-### 1. Crear entorno virtual
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/karyna656/visor-laboratorio.git
+cd visor-laboratorio
+```
+
+### 2. Crear entorno virtual
 ```bash
 python -m venv venv
 venv\Scripts\activate
 ```
 
-### 2. Instalar dependencias
+### 3. Instalar dependencias
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Inicializar base de datos
+### 4. Ejecutar la aplicación
 ```bash
 python app.py
 ```
 
-### 4. Ejecutar la app
-```bash
-python app.py
-```
+La aplicación estará disponible en: **http://localhost:5000**
 
-La app estará disponible en: `http://localhost:5000`
+---
 
-## 📋 Estructura del Proyecto
+## 🔐 Credenciales de Prueba
 
 ```
-visor-laboratorio/
-├── app.py              # Archivo principal (Flask)
-├── requirements.txt    # Dependencias Python
-├── .gitignore         # Archivos ignorados
-├── static/            # CSS, JS, imágenes
-│   ├── css/
-│   └── js/
-├── templates/         # Plantillas HTML
-│   ├── login.html
-│   ├── dashboard.html
-│   └── resultados.html
-└── README.md         # Este archivo
+DNI:         12345678
+Contraseña:  demo123
+Nombre:      Sandra Carina Paijes
 ```
+
+### Pasos para probar:
+1. Abre http://localhost:5000 en tu navegador
+2. Inicia sesión con las credenciales de arriba
+3. Verás el dashboard con un resultado de laboratorio
+4. Haz clic en el resultado para ver más detalles
+5. Intenta acceder a `/resultado/999` - verás error 403 (seguridad)
+
+---
+
+## 📋 Características Implementadas
+
+✅ **Autenticación Segura**
+- Login/Registro de pacientes
+- Contraseñas hasheadas con werkzeug.security
+- Validación de credenciales
+
+✅ **Dashboard Personal**
+- Cada paciente ve solo sus resultados
+- Estado del resultado (Pendiente, Listo, Revisado)
+- Interfaz amigable y responsiva
+
+✅ **Seguridad**
+- Control de acceso: Error 403 si intentas ver resultado de otro paciente
+- Sesiones con validación
+- Base de datos SQLite local
+
+✅ **Funcionalidades**
+- Ver resultados de laboratorio
+- Detalles de cada estudio
+- Descarga de PDF (en desarrollo)
+
+---
 
 ## 🔐 Casos de Prueba (SC-900)
 
