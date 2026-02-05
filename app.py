@@ -21,7 +21,7 @@ class Paciente(db.Model):
     dni = db.Column(db.String(11), unique=True, nullable=False)
     nombre = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    contraseña = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
     resultados = db.relationship('Resultado', backref='paciente', lazy=True)
     
     def __repr__(self):
@@ -54,16 +54,15 @@ def login():
     """Login de paciente"""
     if request.method == 'POST':
         dni = request.form.get('dni')
-        contraseña = request.form.get('contraseña')
-        
+        password = request.form.get('contraseña')
+
         # Buscar paciente en BD
         paciente = Paciente.query.filter_by(dni=dni).first()
-        
-        if paciente and check_password_hash(paciente.contraseña, contraseña):
+
+        if paciente and check_password_hash(paciente.password, password):
             # Contraseña correcta
             session['paciente_id'] = paciente.id
             session['nombre'] = paciente.nombre
-            session['ultimo_acceso'] = datetime.now()
             return redirect(url_for('dashboard'))
         else:
             # Credenciales inválidas
@@ -78,7 +77,7 @@ def registro():
         dni = request.form.get('dni')
         nombre = request.form.get('nombre')
         email = request.form.get('email')
-        contraseña = request.form.get('contraseña')
+        password = request.form.get('contraseña')
         
         # Verificar si DNI ya existe
         if Paciente.query.filter_by(dni=dni).first():
@@ -89,7 +88,7 @@ def registro():
             dni=dni,
             nombre=nombre,
             email=email,
-            contraseña=generate_password_hash(contraseña)
+            password=generate_password_hash(password)
         )
         
         try:
@@ -108,17 +107,6 @@ def dashboard():
     # Verificar sesión activa
     if 'paciente_id' not in session:
         return redirect(url_for('login'))
-    
-    # Verificar expiración de sesión (15 minutos de inactividad)
-    ultimo_acceso = session.get('ultimo_acceso')
-    if ultimo_acceso:
-        ultimo_acceso = datetime.fromisoformat(ultimo_acceso)
-        if datetime.now() - ultimo_acceso > timedelta(minutes=15):
-            session.clear()
-            return redirect(url_for('login'))
-    
-    # Actualizar último acceso
-    session['ultimo_acceso'] = datetime.now().isoformat()
     
     paciente = Paciente.query.get(session['paciente_id'])
     resultados = Resultado.query.filter_by(paciente_id=paciente.id).all()
@@ -155,9 +143,9 @@ if __name__ == '__main__':
         if Paciente.query.count() == 0:
             paciente_demo = Paciente(
                 dni='12345678',
-                nombre='Juan García',
-                email='juan@example.com',
-                contraseña=generate_password_hash('demo123')
+                nombre='Sandra Carina Paijes',
+                email='sandra@example.com',
+                password=generate_password_hash('demo123')
             )
             db.session.add(paciente_demo)
             db.session.commit()
@@ -174,4 +162,4 @@ if __name__ == '__main__':
             db.session.commit()
     
     # Ejecutar app
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)

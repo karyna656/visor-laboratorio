@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traductor de Estudio - Marian</title>
+    <script src="https://cdn.jsdelivr.net/npm/vosk-browser@0.0.7/dist/vosk.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+        h2 { color: #2c3e50; text-align: center; }
+        .voice-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .voice-button:hover { background-color: #c0392b; }
+        .voice-button.recording { background-color: #27ae60; }
+        .voice-button.recording:hover { background-color: #229954; }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { background-color: #2980b9; }
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eef2f7;
+            border-radius: 8px;
+            min-height: 50px;
+            color: #34495e;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🌍 Traductor para Microsoft Learn</h2>
+        <button id="voiceButton" class="voice-button" onclick="toggleReconocimiento()">🎤 Habla en inglés</button>
+        <button onclick="traducir()">Traducir a Español</button>
+        <button onclick="leerTraduccion()">Leer Traducción</button>
+
+        <div id="resultado">El resultado aparecerá aquí...</div>
+    </div>
+
+    <script>
+        let recognition;
+        let isListening = false;
+        let textoCompleto = '';
+
+        function toggleReconocimiento() {
+            const voiceButton = document.getElementById('voiceButton');
+            const resultadoDiv = document.getElementById('resultado');
+
+            if (isListening) {
+                // Detener reconocimiento
+                recognition.stop();
+                isListening = false;
+                voiceButton.classList.remove('recording');
+                voiceButton.innerText = '🎤 Iniciar Traducción Continua';
+                return;
+            }
+
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Tu navegador no soporta reconocimiento de voz.');
+                return;
+            }
+
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US'; // Inglés
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            recognition.onstart = function() {
+                isListening = true;
+                voiceButton.classList.add('recording');
+                voiceButton.innerText = '⏹️ Detener Traducción';
+                resultadoDiv.innerHTML = '<div id="original">Texto original: </div><div id="traducido">Traducción: </div>';
+            };
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                if (finalTranscript) {
+                    textoCompleto += finalTranscript;
+                    traducirTexto(finalTranscript);
+                }
+
+                document.getElementById('original').innerText = `Texto original: ${textoCompleto}${interimTranscript}`;
+            };
+
+            recognition.onerror = function(event) {
+                resultadoDiv.innerText = 'Error en el reconocimiento de voz. Intenta de nuevo.';
+                voiceButton.classList.remove('recording');
+                voiceButton.innerText = '🎤 Iniciar Traducción Continua';
+                isListening = false;
+                console.error(event.error);
+            };
+
+            recognition.onend = function() {
+                voiceButton.classList.remove('recording');
+                voiceButton.innerText = '🎤 Iniciar Traducción Continua';
+                isListening = false;
+            };
+
+            recognition.start();
+        }
+
+        function traducirTexto(texto) {
+            const traducidoDiv = document.getElementById('traducido');
+
+            // Usamos una API gratuita de traducción (MyMemory)
+            const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(texto)}&langpair=en|es`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const traduccion = data.responseData.translatedText;
+                    traducidoDiv.innerText += traduccion + ' ';
+                })
+                .catch(error => {
+                    console.error('Error al traducir:', error);
+                });
+        }
+    </script>
+</body>
+</html>

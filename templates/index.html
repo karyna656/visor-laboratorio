@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Audit Tool - QA Tester</title>
+    <style>
+        :root {
+            --seguro: #22c55e;
+            --peligro: #ef4444;
+            --fondo: #111827;
+        }
+        body { font-family: 'Courier New', monospace; background: var(--fondo); color: #39ff14; display: flex; justify-content: center; padding: 20px; }
+        .terminal { background: #000; width: 100%; max-width: 500px; border: 2px solid #333; border-radius: 10px; padding: 20px; box-shadow: 0 0 20px rgba(57, 255, 20, 0.2); }
+        h1 { font-size: 1.2rem; text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .input-group { margin: 20px 0; }
+        input { width: 90%; background: #111; border: 1px solid #39ff14; color: #39ff14; padding: 10px; font-size: 1.1rem; border-radius: 5px; outline: none; }
+        .meter { height: 10px; background: #222; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+        .bar { height: 100%; width: 0%; transition: 0.5s; }
+        .check-list { font-size: 0.8rem; list-style: none; padding: 0; }
+        .check-list li { margin: 5px 0; color: #666; }
+        .check-list li.ok { color: var(--seguro); }
+        .check-list li.error { color: var(--peligro); }
+    </style>
+</head>
+<body>
+
+    <div class="terminal">
+        <h1>AUDITORÍA DE ACCESO V.1.0</h1>
+        <p>Introduce contraseña para análisis de vulnerabilidad:</p>
+        
+        <div class="input-group">
+            <input type="password" id="passInput" placeholder="Esperando entrada..." oninput="analizar()">
+        </div>
+
+        <div class="meter">
+            <div id="fuerzaBarra" class="bar"></div>
+        </div>
+        <p id="labelFuerza" style="text-align: right; font-size: 0.8rem;">Fuerza: 0%</p>
+
+        <ul class="check-list" id="lista">
+            <li id="minChar">✖ Mínimo 8 caracteres</li>
+            <li id="hasNum">✖ Incluye números</li>
+            <li id="hasSpecial">✖ Caracteres especiales (@#$%^&*)</li>
+        </ul>
+
+        <div id="resultadoFinal" style="margin-top:20px; font-weight: bold; text-align: center;"></div>
+    </div>
+
+    <script>
+        function analizar() {
+            const pass = document.getElementById('passInput').value;
+            const bar = document.getElementById('fuerzaBarra');
+            const label = document.getElementById('labelFuerza');
+            const res = document.getElementById('resultadoFinal');
+            
+            let puntos = 0;
+            
+            // Regla 1: Largo
+            if(pass.length >= 8) {
+                puntos += 33;
+                document.getElementById('minChar').className = 'ok';
+                document.getElementById('minChar').innerText = '✔ Longitud correcta';
+            } else {
+                document.getElementById('minChar').className = 'error';
+                document.getElementById('minChar').innerText = '✖ Mínimo 8 caracteres';
+            }
+
+            // Regla 2: Números
+            if(/\d/.test(pass)) {
+                puntos += 33;
+                document.getElementById('hasNum').className = 'ok';
+                document.getElementById('hasNum').innerText = '✔ Contiene números';
+            } else {
+                document.getElementById('hasNum').className = 'error';
+                document.getElementById('hasNum').innerText = '✖ Incluye números';
+            }
+
+            // Regla 3: Especiales
+            if(/[@#$%^&*]/.test(pass)) {
+                puntos += 34;
+                document.getElementById('hasSpecial').className = 'ok';
+                document.getElementById('hasSpecial').innerText = '✔ Caracteres especiales detectados';
+            } else {
+                document.getElementById('hasSpecial').className = 'error';
+                document.getElementById('hasSpecial').innerText = '✖ Caracteres especiales (@#$%^&*)';
+            }
+
+            // Actualizar Interfaz
+            bar.style.width = puntos + '%';
+            label.innerText = 'Fuerza: ' + puntos + '%';
+
+            if(puntos < 40) {
+                bar.style.background = '#ef4444';
+                res.innerHTML = "ESTADO: <span style='color:#ef4444'>VULNERABLE</span>";
+            } else if (puntos < 90) {
+                bar.style.background = '#f59e0b';
+                res.innerHTML = "ESTADO: <span style='color:#f59e0b'>MEDIO</span>";
+            } else {
+                bar.style.background = '#22c55e';
+                res.innerHTML = "ESTADO: <span style='color:#22c55e'>SEGURO (MILITAR GRADE)</span>";
+            }
+        }
+    </script>
+</body>
+</html>
