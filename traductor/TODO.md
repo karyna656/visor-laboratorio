@@ -1,0 +1,7 @@
+- [x] Remover el textarea del HTML
+- [x] Agregar un botón de micrófono con ícono
+- [x] Actualizar el CSS para el botón de micrófono
+- [x] Modificar el JavaScript para usar SpeechRecognition continuo
+- [x] Implementar traducción en tiempo real
+- [x] Probar la funcionalidad de entrada de voz continua
+- [x] Verificar que la traducción funcione correctamente con texto reconocido

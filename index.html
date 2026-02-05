@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>🛡️ Security Honeypot - Auditoría QA</title>
+    <style>
+        body { background: #0a0a0a; color: #00ff00; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .terminal { border: 2px solid #333; padding: 20px; background: #000; box-shadow: 0 0 15px rgba(0, 255, 0, 0.2); border-radius: 5px; max-width: 500px; width: 100%; }
+        input { background: #111; border: 1px solid #00ff00; color: #00ff00; width: 90%; padding: 10px; margin: 10px 0; outline: none; }
+        .log { margin-top: 20px; width: 100%; max-width: 500px; font-size: 0.8rem; color: #ff3333; }
+        .alert { background: rgba(255, 0, 0, 0.1); border: 1px solid #ff3333; padding: 10px; margin-bottom: 10px; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        button { background: #00ff00; color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <h2>SISTEMA DE DETECCIÓN DE INTRUSOS (IDS)</h2>
+
+    <div class="terminal">
+        <p>[ INICIO DE SESIÓN ADMINISTRATIVO ]</p>
+        <input type="text" id="user" placeholder="Usuario (Ej: admin)">
+        <input type="password" id="pass" placeholder="Password">
+        <button onclick="detectAttack()">INGRESAR AL SISTEMA</button>
+    </div>
+
+    <div class="log" id="monitor">
+        <p style="color: #666;">> Monitor de red activo. Esperando actividad...</p>
+    </div>
+
+    <script>
+        function detectAttack() {
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+            const monitor = document.getElementById('monitor');
+            
+            // Lógica de detección de patrones de ataque (SQL Injection / XSS)
+            const patterns = ["'", "--", "SELECT", "DROP", "<script>", "OR 1=1"];
+            let detected = false;
+
+            patterns.forEach(p => {
+                if (user.toUpperCase().includes(p) || pass.toUpperCase().includes(p)) {
+                    detected = true;
+                }
+            });
+
+            if (detected) {
+                const alertBox = document.createElement('div');
+                alertBox.className = 'alert';
+                alertBox.innerHTML = `⚠️ [ALERTA] Intento de Inyección detectado: ${new Date().toLocaleTimeString()}<br>Origen: IP_SIMULADA_192.168.1.50`;
+                monitor.prepend(alertBox);
+            } else {
+                const info = document.createElement('p');
+                info.style.color = "#aaa";
+                info.innerHTML = `> Intento de acceso fallido (Credenciales incorrectas): ${user}`;
+                monitor.prepend(info);
+            }
+        }
+    </script>
+</body>
+</html>
